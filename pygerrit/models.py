@@ -23,6 +23,8 @@
 
 """ Models for Gerrit JSON data. """
 
+import datetime
+
 from . import from_json
 
 
@@ -68,9 +70,14 @@ class Change(object):
         self.sortkey = from_json(json_data, "sortKey")
         self.status = from_json(json_data, "status")
         self.current_patchset = CurrentPatchset.from_json(json_data)
+        self.last_update_timestamp = from_json(json_data, "lastUpdated")
+        self.comments = []
+        if "comments" in json_data:
+            for comment in json_data["comments"]:
+                self.comments.append(Comment(comment))
 
     def __repr__(self):
-        return u"<Change %s, %s, %s>" % (self.number, self.project, self.branch)
+        return u"<Change %s, %s, %s, %s>" % (self.number, self.owner.username, self.project, self.branch)
 
     @staticmethod
     def from_json(json_data):
@@ -138,6 +145,21 @@ class CurrentPatchset(Patchset):
         if "currentPatchSet" in json_data:
             return CurrentPatchset(json_data["currentPatchSet"])
         return None
+
+
+class Comment(object):
+
+    """ Comment posted for a Change """
+
+    def __init__(self, json_data):
+        self.timestamp = from_json(json_data, "timestamp")
+        self.reviewer = Account.from_json(json_data, "reviewer")
+        self.message = from_json(json_data, "message")
+
+    def __repr__(self):
+        date = datetime.datetime.fromtimestamp(
+            int(self.timestamp)).strftime('%Y-%m-%d %H:%M:%S')
+        return u"<Comment %s %s %s>" % (self.reviewer, self.message, date)
 
 
 class Approval(object):

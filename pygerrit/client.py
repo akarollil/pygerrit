@@ -98,7 +98,7 @@ class GerritClient(object):
         """
         results = []
         command = ["query", "--current-patch-set", "--all-approvals",
-                   "--format JSON", "--commit-message"]
+                   "--format JSON", "--commit-message", "--comments"]
 
         if not isinstance(term, basestring):
             raise ValueError("term must be a string")
