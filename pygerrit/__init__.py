@@ -47,12 +47,12 @@ def escape_string(string):
         so that it can be passed to any of the Gerrit commands that require
         double-quoted strings.
 
-    """
-
     result = string
     result = result.replace('\\', '\\\\')
     result = result.replace('"', '\\"')
     return '"' + result + '"'
+    """
+    return string
 
 
 class GerritReviewMessageFormatter(object):
