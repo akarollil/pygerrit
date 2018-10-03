@@ -75,9 +75,14 @@ class Change(object):
         if "comments" in json_data:
             for comment in json_data["comments"]:
                 self.comments.append(Comment(comment))
+        self.reviewers = []
+        if "allReviewers" in json_data:
+            for reviewer in json_data["allReviewers"]:
+                self.reviewers.append(Account(reviewer))
 
     def __repr__(self):
-        return u"<Change %s, %s, %s, %s>" % (self.number, self.owner.username, self.project, self.branch)
+        return u"<Change %s, %s, %s, %s>" % (
+            self.number, self.owner.username, self.project, self.branch)
 
     @staticmethod
     def from_json(json_data):
