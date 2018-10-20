@@ -29,7 +29,7 @@ from threading import Event, Lock
 
 from .error import GerritError
 
-from paramiko import SSHClient, SSHConfig, ProxyCommand
+from paramiko import SSHClient, SSHConfig, ProxyCommand, AutoAddPolicy
 from paramiko.ssh_exception import SSHException
 
 
@@ -110,6 +110,7 @@ class GerritSSHClient(SSHClient):
     def _do_connect(self):
         """ Connect to the remote. """
         self.load_system_host_keys()
+        self.set_missing_host_key_policy(AutoAddPolicy())
         if self.username is None or self.port is None:
             self._configure()
         try:
@@ -122,7 +123,7 @@ class GerritSSHClient(SSHClient):
             raise GerritError("Failed to connect to server: %s" % e)
 
         try:
-            version_string = self._transport.remote_version
+            version_string = self._transport.remote_version.decode('utf-8')
             pattern = re.compile(r'^.*GerritCodeReview_([a-z0-9-\.]*) .*$')
             self.remote_version = _extract_version(version_string, pattern)
         except AttributeError:
@@ -149,7 +150,7 @@ class GerritSSHClient(SSHClient):
         """ Return the version of the remote Gerrit server. """
         if self.remote_version is None:
             result = self.run_gerrit_command("version")
-            version_string = result.stdout.read()
+            version_string = result.stdout.read().decode('utf-8')
             pattern = re.compile(r'^gerrit version (.*)$')
             self.remote_version = _extract_version(version_string, pattern)
         return self.remote_version
@@ -170,7 +171,7 @@ class GerritSSHClient(SSHClient):
         command execution fails.
 
         """
-        if not isinstance(command, basestring):
+        if not isinstance(command, str):
             raise ValueError("command must be a string")
         gerrit_command = "gerrit " + command
 

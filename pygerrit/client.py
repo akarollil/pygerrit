@@ -23,7 +23,7 @@
 """ Gerrit client interface. """
 
 from json import JSONDecoder
-from Queue import Queue, Empty, Full
+from queue import Queue, Empty, Full
 
 from . import escape_string
 from .error import GerritError
@@ -82,7 +82,7 @@ class GerritClient(object):
         :Raises: `ValueError` if `command` is not a string.
 
         """
-        if not isinstance(command, basestring):
+        if not isinstance(command, str):
             raise ValueError("command must be a string")
         return self._ssh_client.run_gerrit_command(command)
 
@@ -101,7 +101,7 @@ class GerritClient(object):
                    "--format JSON", "--commit-message", "--comments",
                    "--all-reviewers"]
 
-        if not isinstance(term, basestring):
+        if not isinstance(term, str):
             raise ValueError("term must be a string")
 
         command.append(escape_string(term))
@@ -116,7 +116,7 @@ class GerritClient(object):
             # presence of the "type" key to determine whether the dictionary
             # represents a change or if it's the query status indicator.
             try:
-                data = decoder.decode(line)
+                data = decoder.decode(line.decode('utf-8'))
             except ValueError as err:
                 raise GerritError("Query returned invalid data: %s", err)
             if "type" in data and data["type"] == "error":
